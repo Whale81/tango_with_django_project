@@ -28,15 +28,15 @@ def index(request):
     context_dict['pages'] = page_list
     
     visitor_cookie_handler(request)
-    context_dict['visits'] = request.session['visits']
-    # Obtain our Response object early so we can add cookie information.
-    response = render(request, 'rango/index.html', context=context_dict)
     
-    # Return response back to the user, updating any cookies that need changed.
-    return response
+    return render(request, 'rango/index.html', context=context_dict)
 
 def about(request):
-    return render(request, 'rango/about.html')
+    context_dict = {}
+    visitor_cookie_handler(request)
+    context_dict['visits'] = request.session['visits']
+
+    return render(request, 'rango/about.html', context=context_dict)
 
 def show_category(request, category_name_slug):
     # Create a context dictionary which we can pass
@@ -236,7 +236,7 @@ def visitor_cookie_handler(request):
     # We use the COOKIES.get() function to obtain the visits cookie.
     # If the cookie exists, the value returned is casted to an integer.
     # If the cookie doesn't exist, then the default value of 1 is used.
-    visits = int(request.COOKIES.get('visits', '1'))
+    visits = int(get_server_side_cookie(request,'visits', '1'))
 
     last_visit_cookie = get_server_side_cookie(request, 'last_visit', str(datetime.now()))
     last_visit_time = datetime.strptime(last_visit_cookie[:-7], '%Y-%m-%d %H:%M:%S')
